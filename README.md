@@ -4,7 +4,7 @@ In the realm of financial services, processing bulk cash and holding payments ef
 
 #### The Problem
 
-Our legacy implementation for processing bulk cash holding adjustments was primarily handled through application code, which resulted in several performance issues:
+Our legacy implementation for processing bulk cash holding payments was primarily handled through application code, which resulted in several performance issues:
 
 - **High Population of Data**: The system had to process a large volume of transactions.
 - **Multiple Direct Database Calls**: Each operation involved numerous direct calls to the database, adding significant latency.
