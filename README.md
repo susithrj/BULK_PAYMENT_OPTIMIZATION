@@ -24,17 +24,16 @@ We introduced PL/SQL procedures to handle the bulk of the processing. Here's an 
 
 - **Initial Bulk Process Start**:
     ```java
-    logger.info("LN:182", "Paying Agent Request processing started through DB : sp_paying_agent_process_c ");
-    setOMsTransactionManageCountryWrapperLocal();
-    getOmsTransactionManageCountryWrapperLocal().validatePayingAgentBulkStatus(payingAgentRequestBean.getOmsMsgHeader().getTenantCode(), payingAgentRequestBean, 1);
-    getOmsTransactionManageCountryWrapperLocal().validatePayingAgentBulkStatus(payingAgentRequestBean.getOmsMsgHeader().getTenantCode(), payingAgentRequestBean, 2);
+    logger.info("LN:xxx", "Bulk Payment Request processing started through DB : sp_bulk_paying_process_c ");
+    getOmsTransactionManageCountryWrapperLocal().validatePayingBulkStatus(payingBulkRequestBean.getOmsMsgHeader().getTenantCode(), payingBulkRequestBean, 1);
+    getOmsTransactionManageCountryWrapperLocal().validatePayingBulkStatus(payingBulkRequestBean.getOmsMsgHeader().getTenantCode(), payingBulkRequestBean, 2);
     ```
 
 - **Validation Method**:
     ```java
-    public void validatePayingAgentBulkStatus(String tenantCode, PayingAgentRequestBean payingAgentRequestBean, int processType) {
+    public void validatePayingAgentBulkStatus(String tenantCode, PayingBulkRequestBean payingBulkRequestBean, int processType) {
         try {
-            getT501PaymentDetailDAO().updatePayingAgentBulkProcessStatus(payingAgentRequestBean, processType);
+            getPaymentDetailDAO().updatePayingAgentBulkProcessStatus(bulkPayingRequestBean, processType);
         } catch (Exception ex) {
             logger.error("Exception While Updating paying Agent status Update, RollBack Call " + ex);
             getSessionContext().setRollbackOnly();
@@ -44,19 +43,19 @@ We introduced PL/SQL procedures to handle the bulk of the processing. Here's an 
 
 - **Database Update Method**:
     ```java
-    public boolean updatePayingAgentBulkProcessStatus(PayingAgentRequestBean payingAgentRequestBean, int processType) {
+    public boolean updateBulkPayingProcessStatus(BulkPayingRequestBean bulkPayingRequestBean, int processType) {
         Connection connection = null;
         CallableStatement cs = null;
         try {
-            connection = getDBConnectionXA(payingAgentRequestBean.getOmsMsgHeader().getTenantCode());
-            cs = connection.prepareCall("{call sp_paying_agent_process_c(?,?,?,?)}");
+            connection = getDBConnectionXA(bulkPayingRequestBean.getOmsMsgHeader().getTenantCode());
+            cs = connection.prepareCall("{call sp_bulk_paying_process_c(?,?,?,?)}");
             cs.setLong(OMSConst.NUMBER_1, payingAgentRequestBean.getRequestBody().getPayingSessionId());
             cs.setInt(OMSConst.NUMBER_2, processType);
             cs.setInt(OMSConst.NUMBER_3, payingAgentRequestBean.getOmsMsgHeader().getLoginID());
             cs.setInt(OMSConst.NUMBER_4, payingAgentRequestBean.getRequestBody().getInstituteId());
             cs.executeQuery();
         } catch (Exception e) {
-            logger.error("LN:116", "Error executing call sp_paying_agent_process_c", e);
+            logger.error("LN:116", "Error executing call sp_bulk_paying_process_c", e);
             throw new OMSCoreDAOException(ErrorCodes.DAO_ERROR, e);
         } finally {
             close(connection, cs);
@@ -70,7 +69,7 @@ We introduced PL/SQL procedures to handle the bulk of the processing. Here's an 
 The core processing logic was moved into a PL/SQL procedure. Here’s a simplified version of the `sp_paying_agent_process_c` procedure:
 
 ```sql
-PROCEDURE sp_paying_agent_process_c (
+PROCEDURE sp_bulk_paying_process_c (
     p_t500_id          IN NUMBER,
     p_type             IN NUMBER,  -- 1 = Initial bulk process, 2 = process
     p_user_id          IN NUMBER,
