@@ -16,6 +16,8 @@ These factors combined led to substantial delays, making the system inefficient 
 
 To address these issues, we implemented a hybrid approach, combining application code with stored procedures. By moving the heavy-lifting database operations into the database itself, we significantly reduced the latency and improved the overall performance.
 
+###Add component utilization graphic 
+
 #### Implementation
 
 **1. Code Level Changes**
