@@ -35,7 +35,7 @@ We introduced PL/SQL procedures to handle the bulk of the processing. Here's an 
     ```java
     public void validatePayingAgentBulkStatus(String tenantCode, PayingBulkRequestBean payingBulkRequestBean, int processType) {
         try {
-            getPaymentDetailDAO().updatePayingAgentBulkProcessStatus(bulkPayingRequestBean, processType);
+            getPaymentDetailDAO().updateBulkPayingProcessStatus(bulkPayingRequestBean, processType);
         } catch (Exception ex) {
             logger.error("Exception While Updating paying Agent status Update, RollBack Call " + ex);
             getSessionContext().setRollbackOnly();
@@ -87,6 +87,7 @@ BEGIN
                           WHERE t501_status_id_v01 = 2 AND t501_payment_session_id_t500 = p_t500_id);
     ELSIF (p_type = 2) THEN
         -- Detailed processing logic here
+        -- At the end, we set u06_bulk_process_status_c = 2 
     END IF;
 END;
 ```
